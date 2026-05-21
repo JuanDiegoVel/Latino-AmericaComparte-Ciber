@@ -11,43 +11,36 @@
 
 ---
 
+## ¿Cómo está organizado este repositorio?
+
+Cada laboratorio vive en su **propia rama**. Dentro de cada rama encontrarás el documento PDF del laboratorio y su README explicativo.
+
+| Rama | Documento | README |
+|---|---|---|
+| `main` | *(este archivo)* | README general del proyecto |
+| `dns-footprinting` | `DNS_ProyectoCiber.pdf` | `README_DNS_Footprinting.md` |
+| `maltego-osint` | `Maltego_ProyectoCiber.pdf` | `README_Maltego.md` |
+| `owasp-zap` | `OWAS_ProyectoCiber.pdf` | `README_OWASP_ZAP.md` |
+| `burp-suite` | `BURP_ProyectoCiber.pdf` | `README_Burp_Suite.md` |
+| `clonacion-httrack` | `Clonacion_ProyectoCiber.pdf` + imágenes + `.tex` | `README_Clonacion_HTTrack.md` |
+
+> 💡 Para ver el contenido de cada laboratorio cambia de rama usando el menú desplegable **"main ▾"** arriba a la izquierda en GitHub.
+
+---
+
 ## Descripción general
 
 Este repositorio reúne cinco análisis de seguridad realizados sobre el sitio web **`https://latinoamericacomparte.com`**, abarcando desde reconocimiento pasivo hasta análisis de tráfico HTTP, clonación del sitio y análisis de exposición de código fuente. Cada análisis usa una herramienta distinta y documenta hallazgos, capturas de terminal y recomendaciones desde la perspectiva Blue Team.
 
 ---
 
-## Estructura del proyecto
+## Rama 1 — `dns-footprinting`
+### DNS Footprinting Pasivo · `nslookup · dig · whois`
 
-```
-.
-├── README.md                          ← Este archivo (visión general)
-├── DNS_Footprinting/
-│   └── README.md                      ← nslookup · dig · whois
-├── Maltego/
-│   └── README.md                      ← Reconocimiento OSINT e infraestructura
-├── OWASP_ZAP/
-│   └── README.md                      ← Análisis pasivo de seguridad web
-├── Burp_Suite/
-│   └── README.md                      ← Análisis de tráfico HTTP/HTTPS
-└── Clonacion_HTTrack/
-    ├── README.md                      ← Clonación del sitio y análisis de exposición
-    ├── ClonacionSitio_LatinoamericaComparte.tex
-    ├── Clonacion_1.png  →  Salida verbose de HTTrack
-    ├── Clonacion_2.png  →  Servidor HTTP local (logs 200 OK)
-    ├── Clonacion_3.png  →  grep "api"
-    ├── Clonacion_4.png  →  grep "fetch"
-    ├── Clonacion_5.png  →  grep "token" / "key"
-    └── Clonacion_6.png  →  grep "http"
-```
+📄 **Documento:** `DNS_ProyectoCiber.pdf`  
+📋 **README:** `README_DNS_Footprinting.md`
 
----
-
-## Resumen de cada análisis
-
-### 1. DNS Footprinting Pasivo — `nslookup · dig · whois`
-
-Se realizó reconocimiento DNS completamente pasivo usando las herramientas de línea de comandos de Kali Linux. Se consultaron registros A, NS, PTR, DNSKEY y DS, además del registro WHOIS del dominio.
+Se realizó reconocimiento DNS completamente pasivo usando herramientas de línea de comandos. Se consultaron registros A, NS, PTR, DNSKEY y DS, además del registro WHOIS del dominio.
 
 **Hallazgos principales:**
 - IP del servidor: `64.202.187.143`
@@ -55,75 +48,85 @@ Se realizó reconocimiento DNS completamente pasivo usando las herramientas de l
 - **DNSSEC no implementado** → vulnerable a DNS Cache Poisoning
 - TTL atípicamente bajo (159 s) → posible riesgo de DNS rebinding
 - Dominio joven (creado agosto 2025, vence agosto 2026)
-- Shared hosting detectado: el PTR de una IP vecina resuelve a `copilots.dev`
-- Contacto admin DNS expuesto: `dns@jomax.net` (GoDaddy)
+- Shared hosting: PTR de IP vecina resuelve a `copilots.dev`
 
 ---
 
-### 2. Maltego — Reconocimiento OSINT e Infraestructura
+## Rama 2 — `maltego-osint`
+### Maltego · Reconocimiento OSINT e Infraestructura
 
-Se utilizó Maltego CE para construir un grafo de infraestructura completo del dominio objetivo mediante transforms sobre fuentes públicas (DNS, WHOIS, Wayback Machine, redes sociales). No se generó tráfico directo hacia el servidor.
+📄 **Documento:** `Maltego_ProyectoCiber.pdf`  
+📋 **README:** `README_Maltego.md`
+
+Se usó Maltego CE para construir un grafo de infraestructura completo mediante transforms sobre fuentes públicas (DNS, WHOIS, Wayback Machine). Sin tráfico directo al servidor.
 
 **Hallazgos principales:**
-- Más de 15 subdominios descubiertos, incluyendo `cpanel.`, `whm.`, `webdisk.`, `aulavirtual.`, `www.admin.`
+- Más de 15 subdominios descubiertos: `cpanel.`, `whm.`, `webdisk.`, `aulavirtual.`, `www.admin.`
 - Panel administrativo `www.admin.latinoamericacomparte.com` visible en DNS público
-- Todos los servicios críticos comparten la misma IP (`64.202.187.143`) en shared hosting `/24` (AS398101)
-- Capturas de Wayback Machine (feb–mar 2026), incluyendo versiones HTTP sin TLS
-- Presencia confirmada en Instagram
-- Email del registrador `dns@jomax.net` visible en el grafo
+- Todos los servicios críticos comparten la misma IP en shared hosting `/24` (AS398101)
+- Capturas de Wayback Machine (feb–mar 2026) incluyendo versiones HTTP sin TLS
 
 ---
 
-### 3. OWASP ZAP — Análisis Pasivo de Seguridad Web
+## Rama 3 — `owasp-zap`
+### OWASP ZAP · Análisis Pasivo de Seguridad Web
 
-Se configuró Firefox para enrutar el tráfico a través del proxy ZAP (`localhost:8080`) y se navegó manualmente el sitio. Se usaron los módulos History, Spider, AJAX Spider y Client Spider, todos en modo pasivo observacional. No se ejecutó Active Scan sobre el servidor de producción.
+📄 **Documento:** `OWAS_ProyectoCiber.pdf`  
+📋 **README:** `README_OWASP_ZAP.md`
+
+Se configuró Firefox para enrutar el tráfico a través del proxy ZAP (`localhost:8080`). Se usaron los módulos History, Spider, AJAX Spider y Client Spider en modo pasivo. Sin Active Scan.
 
 **Hallazgos principales:**
-- Plataforma Moodle (`/aulavirtual/`) identificada con rutas `/lib`, `/theme`, `pluginfile.php`
-- Alertas de nivel **Medium** en sitio principal y aula virtual: `Form, Hidden, Script`, `Password`, `SetCookie`
-- AJAX Spider rastreó 68 URLs; imagenes sin control de acceso con tamaños hasta 7.1 MB
+- Plataforma Moodle identificada con rutas `/lib`, `/theme`, `pluginfile.php`
+- Alertas **Medium**: `Form, Hidden, Script`, `Password`, `SetCookie`
+- AJAX Spider rastreó 68 URLs; imágenes sin control de acceso hasta 7.1 MB
 - Client Spider descubrió rutas autenticadas: `/aulavirtual/login/`, `/aulavirtual/my/`
-- CDNs externos (Google Fonts, Cloudflare) sin verificación de Subresource Integrity (SRI)
 
 ---
 
-### 4. Burp Suite — Análisis de Tráfico HTTP/HTTPS
+## Rama 4 — `burp-suite`
+### Burp Suite · Análisis de Tráfico HTTP/HTTPS
 
-Se usó Burp Suite Community Edition como proxy de intercepción para capturar y analizar el tráfico generado al navegar el sitio. Se trabajaron los módulos Proxy/Intercept, HTTP History y Repeater.
+📄 **Documento:** `BURP_ProyectoCiber.pdf`  
+📋 **README:** `README_Burp_Suite.md`
+
+Se usó Burp Suite Community Edition como proxy de intercepción. Módulos trabajados: Proxy/Intercept, HTTP History y Repeater.
 
 **Hallazgos principales:**
-- Sitio hermano `colombiacomparte.com` descubierto en el historial (IP distinta: `192.124.249.102`)
-- Endpoint WordPress expuesto: `/wp-admin/admin-ajax.php` y `/wp-json/sliderrevolution/` (historial de CVEs críticos)
-- Carga de Google Fonts con `Sec-Fetch-Site: cross-site` sin SRI verificable
-- CSP solo contiene `upgrade-insecure-requests` → prácticamente ineficaz contra XSS
+- Sitio hermano `colombiacomparte.com` descubierto (IP: `192.124.249.102`)
+- WordPress expuesto: `/wp-admin/admin-ajax.php` y `/wp-json/sliderrevolution/` (CVEs críticos)
+- CSP solo contiene `upgrade-insecure-requests` → ineficaz contra XSS
 - Cabecera `Server: Sucuri/Cloudproxy` revela el WAF utilizado
-- Cookies de sesión (`sbjs_*`) enviadas en POST sin cifrado adicional
 
 ---
 
-### 5. Clonación de Sitio y Análisis de Exposición — HTTrack
+## Rama 5 — `clonacion-httrack`
+### HTTrack · Clonación de Sitio y Análisis de Exposición
 
-Se clonó el sitio completo con HTTrack Website Copier, se levantó un servidor HTTP local y se analizó el código fuente del espejo con búsquedas `grep` para detectar exposición de APIs, tokens, claves y URLs externas.
+📄 **Documento:** `Clonacion_ProyectoCiber.pdf`  
+📄 **LaTeX:** `ClonacionSitio_LatinoamericaComparte.tex`  
+🖼️ **Capturas:** `Clonacion_1.png` al `Clonacion_6.png`  
+📋 **README:** `README_Clonacion_HTTrack.md`
+
+Se clonó el sitio completo con HTTrack, se levantó un servidor HTTP local y se analizó el código fuente del espejo con `grep` para detectar APIs, tokens, claves y URLs externas.
 
 **Hallazgos principales:**
 - 76 links escaneados, 66 archivos descargados (≈ 38.8 MB) en 1 min 26 s
-- 9 errores 404 en rutas referenciadas (`/quienes.html`, `/paises.html`, etc.) → navegación SPA sin páginas independientes
-- Único servicio externo real: `api.web3forms.com/submit` para el formulario de contacto
+- 9 errores 404 en rutas referenciadas → navegación SPA sin páginas independientes
 - No se encontraron tokens, claves API ni secretos expuestos en el frontend
-- Las búsquedas de `token` y `key` solo retornaron código de la librería `anime.min.js` (tercero)
-- Buenas prácticas básicas de seguridad frontend confirmadas
+- Búsquedas de `token` y `key` solo retornaron código de `anime.min.js` (tercero)
 
 ---
 
 ## Herramientas utilizadas
 
-| Herramienta | Versión | Módulo / Uso |
+| Herramienta | Versión | Rama |
 |---|---|---|
-| nslookup / dig / whois | GNU / BIND 9.20 | DNS Footprinting pasivo |
-| Maltego CE | Kali Linux 2026.1 | OSINT, grafos de infraestructura |
-| OWASP ZAP | 2.17.0 | Proxy pasivo, Spider, AJAX Spider |
-| Burp Suite Community | v2026.2.3 | Proxy, HTTP History, Repeater |
-| HTTrack Website Copier | 3.49-6 | Clonación de sitio, análisis grep |
+| nslookup / dig / whois | GNU / BIND 9.20 | `dns-footprinting` |
+| Maltego CE | Kali Linux 2026.1 | `maltego-osint` |
+| OWASP ZAP | 2.17.0 | `owasp-zap` |
+| Burp Suite Community | v2026.2.3 | `burp-suite` |
+| HTTrack Website Copier | 3.49-6 | `clonacion-httrack` |
 
 ---
 
@@ -140,14 +143,14 @@ Todos los análisis siguen un enfoque de **reconocimiento pasivo y observacional
 
 ## Recomendaciones consolidadas
 
-| Prioridad | Recomendación | Herramienta que lo detectó |
+| Prioridad | Recomendación | Rama donde se detectó |
 |---|---|---|
-| 🔴 Alta | Implementar DNSSEC | dig / whois |
-| 🔴 Alta | Ocultar subdominios administrativos (cpanel, whm, www.admin) | Maltego |
-| 🟠 Media | Reforzar CSP (agregar `script-src`, `default-src`) | Burp Suite |
-| 🟠 Media | Implementar SRI en recursos CDN externos | OWASP ZAP / Burp Suite |
-| 🟠 Media | Normalizar TTL DNS (de 159 s a 3600–86400 s) | dig |
-| 🟠 Media | Ocultar cabecera `Server` (no revelar WAF/tecnología) | Burp Suite |
-| 🟡 Baja | Resolver rutas 404 referenciadas en el HTML | HTTrack |
-| 🟡 Baja | Renovar dominio antes de agosto 2026 | whois |
-| 🟡 Baja | Optimizar imágenes (hasta 7.1 MB detectados) | OWASP ZAP |
+| 🔴 Alta | Implementar DNSSEC | `dns-footprinting` |
+| 🔴 Alta | Ocultar subdominios administrativos (cpanel, whm, www.admin) | `maltego-osint` |
+| 🟠 Media | Reforzar CSP (`script-src`, `default-src`) | `burp-suite` |
+| 🟠 Media | Implementar SRI en recursos CDN externos | `owasp-zap` / `burp-suite` |
+| 🟠 Media | Normalizar TTL DNS (159 s → 3600–86400 s) | `dns-footprinting` |
+| 🟠 Media | Ocultar cabecera `Server` (no revelar WAF) | `burp-suite` |
+| 🟡 Baja | Resolver rutas 404 referenciadas en el HTML | `clonacion-httrack` |
+| 🟡 Baja | Renovar dominio antes de agosto 2026 | `dns-footprinting` |
+| 🟡 Baja | Optimizar imágenes (hasta 7.1 MB detectados) | `owasp-zap` |
